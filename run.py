@@ -7,7 +7,7 @@ from flask import Flask, render_template, request
 
 from sigma.conversion.base import Backend
 from sigma.cli.backends import backends
-from sigma.cli.pipelines import pipelines
+from sigma.cli.pipelines import pipeline_resolver
 from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaError
 
@@ -19,7 +19,7 @@ def home():
     for backend in backends.keys():
         for name, description in backends[backend].formats.items():
             formats.append({"name": name, "description": description, "backend": backend})
-    return render_template('index.html', backends=backends, pipelines=pipelines, formats=formats)
+    return render_template('index.html', backends=backends, pipelines=pipeline_resolver, formats=formats)
 
 @app.route('/sigma', methods=['POST'])
 def convert():
@@ -34,7 +34,7 @@ def convert():
     format = request.json['format']
 
     backend_class = backends[target].cls
-    processing_pipeline = pipelines.resolve(tuple(pipeline))
+    processing_pipeline = pipeline_resolver.resolve(tuple(pipeline))
     backend : Backend = backend_class(processing_pipeline=processing_pipeline)
 
     try:
